@@ -1,11 +1,22 @@
+/**
+ *
+ */
 class DataCell(var tag: String, var note: String, var login: String, var password: String)
 
+/**
+ *
+ */
 abstract class DataTable(private var path: String? = null,
                          private var masterPass: String? = null, private val cryptData: String = " "){
-    val dataList = mutableListOf<DataCell>()
+    /**
+     *
+     */
+    protected val dataList = mutableListOf<DataCell>()
+
+    /**
+     *
+     */
     var isSaved = true
-        get() = field
-    //init { open() } //??
 
     /**
      * Add an item to collection.
@@ -17,6 +28,7 @@ abstract class DataTable(private var path: String? = null,
 
     /**
      * Remove an item from the collection by [id].
+     *
      * @return [0] – success, [-2] – IndexOutOfBoundsException, [-1] – unhandled exception.
      */
     fun delete(id: Int): Int{
@@ -99,8 +111,8 @@ abstract class DataTable(private var path: String? = null,
         var strToSave = CurrentVersionFileA.char().toString()
 
         try {
-            val encrypt =AesEncryptor.Encryption(res, masterPass!!)
-            val decrypt = AesEncryptor.Decryption(encrypt, masterPass!!)
+            val encrypt =AesObj.encrypt(res, masterPass!!)
+            val decrypt = AesObj.decrypt(encrypt, masterPass!!)
             if (decrypt == res) strToSave+= encrypt
             else return 2
         }
@@ -138,7 +150,7 @@ abstract class DataTable(private var path: String? = null,
             when(cryptData[0]){
                 FileVersion.VER_2_TYPE_A.char() -> {
                     try {
-                        val data = AesEncryptor.Decryption(cryptData.removeRange(0, 1), masterPass!!)
+                        val data = AesObj.decrypt(cryptData.removeRange(0, 1), masterPass!!)
                         if (data == "/error") return 3
                         for (list in data.split("\n")) {
                             val strs = list.split("\t")
@@ -156,9 +168,57 @@ abstract class DataTable(private var path: String? = null,
         return 0
     }
 
+    /**
+     *
+     */
     abstract fun askPassword() : String
+
+    /**
+     *
+     */
     abstract fun askPath() : String
+
+    /**
+     *
+     */
     abstract fun writeToFile(pathToFile: String, cryptData: String)
 
+    /**
+     *
+     */
+    fun searchByData(query: String): List<DataCell> {
+        val results = mutableListOf<DataCell>()
+        for (data in dataList){
+            if (data.note.contains(query) || data.login.contains(query)) results.add(data)
+        }
 
+        return results
+    }
+
+    /**
+     *
+     */
+    fun searchByTag(query: String): List<DataCell> {
+        val results = mutableListOf<DataCell>()
+        for (data in dataList){
+            if (data.tag.contains(query)) results.add(data)
+        }
+
+        return results
+    }
+
+    /**
+     * 
+     */
+    fun getPassword(id: Int): String{
+        return try {
+            dataList[id].password
+        }
+        catch (e: Exception){
+            when(e){
+                is IndexOutOfBoundsException -> "/error: outOfBounds"
+                else -> "/error: unhandledException"
+            }
+        }
+    }
 }
