@@ -11,7 +11,7 @@ abstract class DataTable(private var path: String? = null,
     /**
      *
      */
-    protected val dataList = mutableListOf<DataCell>()
+    private val dataList = mutableListOf<DataCell>()
 
     /**
      *
@@ -208,7 +208,7 @@ abstract class DataTable(private var path: String? = null,
     }
 
     /**
-     * 
+     *
      */
     fun getPassword(id: Int): String{
         return try {
@@ -220,5 +220,18 @@ abstract class DataTable(private var path: String? = null,
                 else -> "/error: unhandledException"
             }
         }
+    }
+
+    /**
+     *
+     */
+    fun getData(): List<DataCell> {
+        val results = mutableListOf<DataCell>()
+        for (data in dataList){
+            val hasPassword = if (data.password.isNotEmpty()) "/yes" else "/no"
+            results.add(DataCell(data.tag, data.note, data.login, hasPassword))
+        }
+
+        return results
     }
 }
