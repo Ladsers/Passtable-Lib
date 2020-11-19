@@ -46,4 +46,11 @@ object Updater {
 
         return if (isNeedUpdate) 1 else 0
     }
+
+    /**
+     * Get the latest version tag.
+     *
+     * @return the latest version tag.
+     */
+    fun getLastVer() = lastVer
 }
