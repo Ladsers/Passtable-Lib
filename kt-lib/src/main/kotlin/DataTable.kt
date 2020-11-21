@@ -23,6 +23,13 @@ abstract class DataTable(private var path: String? = null,
     private val dataList = mutableListOf<DataItem>()
 
     /**
+     * The last saved collection of items.
+     *
+     * @see DataItem
+     */
+    private val dataListLastSave = mutableListOf<DataItem>()
+
+    /**
      * Save flag.
      *
      * It is checked when user safely close the app or open an another file.
@@ -237,6 +244,8 @@ abstract class DataTable(private var path: String? = null,
                 substringBeforeLast(".").plus(".passtable")
                 writeToFile(originalName, strToSave) // attempt to save the file near the app itself.
                 path = originalName
+                isSaved = true // reset the flag
+                dataListLastSave.clear(); dataListLastSave.addAll(dataList) // updating the last saved version
                 return 3
             }
             catch (e: Exception){
@@ -244,7 +253,19 @@ abstract class DataTable(private var path: String? = null,
             }
         }
         isSaved = true // reset the flag
+        dataListLastSave.clear(); dataListLastSave.addAll(dataList) // updating the last saved version
         return 0
+    }
+
+    /**
+     * Roll back the main collection to the last saved version.
+     *
+     * @see dataList
+     */
+    fun rollback(){
+        dataList.clear()
+        dataList.addAll(dataListLastSave)
+        isSaved = true
     }
 
     /**
