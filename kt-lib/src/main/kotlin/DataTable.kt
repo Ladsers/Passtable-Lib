@@ -42,11 +42,15 @@ abstract class DataTable(private var path: String? = null,
     /**
      * Add an item to the main collection.
      *
+     * @return [0] - success, [1] - note is empty and/or login & password is empty.
      * @see dataList
      */
-    fun add(tag: String, note: String, login: String, password: String) {
+    fun add(tag: String, note: String, login: String, password: String): Int {
+        if (note.isEmpty() && (login.isEmpty() || password.isEmpty())) return 1;
+
         dataList.add(DataItem(tag,note,login,password))
         isSaved = false
+        return 0;
     }
 
     /**
@@ -148,8 +152,10 @@ abstract class DataTable(private var path: String? = null,
      */
     fun searchByData(query: String): List<DataItem> {
         val results = mutableListOf<DataItem>()
+        val queryLowerCase = query.toLowerCase()
         for (data in dataList){
-            if (data.note.contains(query) || data.login.contains(query)) results.add(data)
+            if (data.note.toLowerCase().contains(queryLowerCase) ||
+                data.login.toLowerCase().contains(queryLowerCase)) results.add(data)
         }
 
         return results
