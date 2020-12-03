@@ -2,9 +2,10 @@
  * A class for storing data of one item.
  *
  * Can store the following data: [tag], [note], [login], [password].
+ * Additionally, can store a real [id] when searching.
  * @constructor Initialization with all necessary data is required. Data can be an empty string.
  */
-class DataItem(var tag: String, var note: String, var login: String, var password: String)
+class DataItem(var tag: String, var note: String, var login: String, var password: String, val id: Int = -1)
 
 /**
  * An abstract class containing all user data and methods for working with them.
@@ -28,6 +29,14 @@ abstract class DataTable(private var path: String? = null,
      * @see DataItem
      */
     private val dataListLastSave = mutableListOf<DataItem>()
+
+    /**
+     * Mask a password.
+     *
+     * @return [/yes] - item has a password, [/no] - item has no password.
+     * @see DataItem
+     */
+    private fun hasPassword(dataItem: DataItem) = if (dataItem.password.isNotEmpty()) "/yes" else "/no"
 
     /**
      * Save flag.
@@ -111,8 +120,7 @@ abstract class DataTable(private var path: String? = null,
     fun getData(): List<DataItem> {
         val results = mutableListOf<DataItem>()
         for (data in dataList){
-            val hasPassword = if (data.password.isNotEmpty()) "/yes" else "/no"
-            results.add(DataItem(data.tag, data.note, data.login, hasPassword))
+            results.add(DataItem(data.tag, data.note, data.login, hasPassword(data)))
         }
 
         return results
@@ -153,9 +161,9 @@ abstract class DataTable(private var path: String? = null,
     fun searchByData(query: String): List<DataItem> {
         val results = mutableListOf<DataItem>()
         val queryLowerCase = query.toLowerCase()
-        for (data in dataList){
-            if (data.note.toLowerCase().contains(queryLowerCase) ||
-                data.login.toLowerCase().contains(queryLowerCase)) results.add(data)
+        for ((id, data) in dataList.withIndex()){
+            if (data.note.toLowerCase().contains(queryLowerCase) || data.login.toLowerCase().contains(queryLowerCase))
+                    results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
         }
 
         return results
@@ -169,8 +177,8 @@ abstract class DataTable(private var path: String? = null,
      */
     fun searchByTag(query: String): List<DataItem> {
         val results = mutableListOf<DataItem>()
-        for (data in dataList){
-            if (data.tag.contains(query)) results.add(data)
+        for ((id, data) in dataList.withIndex()){
+            if (data.tag.contains(query)) results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
         }
 
         return results
