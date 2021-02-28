@@ -224,14 +224,15 @@ abstract class DataTable(private var path: String? = null,
      * It is possible to save the file with new [path] and new [masterPass].
      * @return [0] – success, [2] – the saved data does not match the current data,
      * [-2] – encryption error, [3] – saved in the same directory as the app,
-     * [4] – empty data, [-3] – error writing to file.
+     * [4] – empty data, [-3] – error writing to file, [5] - the path to the file for save was not specified,
+     * [6] - the master password was not specified.
      * @see AesObj
      */
     fun save(newPath: String? = path, newMasterPass: String? = masterPass): Int {
         if (dataList.isEmpty()) return 4
-        /* Getting missing information. */
-        path = newPath ?: askPath()
-        masterPass = newMasterPass ?: askPassword()
+        /* Checking for missing information. */
+        path = newPath ?: return 5
+        masterPass = newMasterPass ?: return 6
         /* Combining data by template: tag \t note \t login \t password \n. */
         var res = ""
         for (data in dataList) res+= data.tag + "\t" + data.note + "\t" + data.login + "\t" +
@@ -289,22 +290,6 @@ abstract class DataTable(private var path: String? = null,
      * @see save
      */
     fun getPath() = path
-
-    /**
-     * Ask user for the master password if it is null.
-     *
-     * Abstract because it can be specific to some OS.
-     * @return the master password that user entered.
-     */
-    abstract fun askPassword(): String
-
-    /**
-     * Ask user for the path to the file for save if it is null.
-     *
-     * Abstract because it can be specific to some OS.
-     * @return the path that user entered.
-     */
-    abstract fun askPath(): String
 
     /**
      * The process of writing encrypted information to the passtable-file.
