@@ -117,7 +117,7 @@ abstract class DataTable(
      * "/yes" - item has a password, "/no" - item has no password.
      * @see dataList
      */
-    fun getData(): List<DataItem> {
+    fun getData(): MutableList<DataItem> {
         val results = mutableListOf<DataItem>()
         for (data in dataList) {
             results.add(DataItem(data.tag, data.note, data.login, hasPassword(data)))
