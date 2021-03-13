@@ -14,8 +14,10 @@ class DataItem(var tag: String, var note: String, var login: String, var passwor
  * [masterPass] and the encrypted [cryptData] from this file. If the file doesn't exist yet,
  * the constructor must be empty.
  */
-abstract class DataTable(private var path: String? = null,
-                         private var masterPass: String? = null, private val cryptData: String = " "){
+abstract class DataTable(
+    private var path: String? = null,
+    private var masterPass: String? = null, private val cryptData: String = " "
+) {
     /**
      * The main collection containing all items (all user data).
      *
@@ -55,11 +57,11 @@ abstract class DataTable(private var path: String? = null,
      * @see dataList
      */
     fun add(tag: String, note: String, login: String, password: String): Int {
-        if (note.isEmpty() && (login.isEmpty() || password.isEmpty())) return 1;
+        if (note.isEmpty() && (login.isEmpty() || password.isEmpty())) return 1
 
-        dataList.add(DataItem(tag,note,login,password))
+        dataList.add(DataItem(tag, note, login, password))
         isSaved = false
-        return 0;
+        return 0
     }
 
     /**
@@ -72,9 +74,8 @@ abstract class DataTable(private var path: String? = null,
         try {
             dataList.removeAt(id)
             isSaved = false
-        }
-        catch (e: Exception){
-            return when(e){
+        } catch (e: Exception) {
+            return when (e) {
                 is IndexOutOfBoundsException -> -2
                 else -> -1
             }
@@ -100,9 +101,8 @@ abstract class DataTable(private var path: String? = null,
                 else -> return 1
             }
             isSaved = false
-        }
-        catch (e:Exception){
-            return when(e){
+        } catch (e: Exception) {
+            return when (e) {
                 is IndexOutOfBoundsException -> -2
                 else -> -1
             }
@@ -119,7 +119,7 @@ abstract class DataTable(private var path: String? = null,
      */
     fun getData(): List<DataItem> {
         val results = mutableListOf<DataItem>()
-        for (data in dataList){
+        for (data in dataList) {
             results.add(DataItem(data.tag, data.note, data.login, hasPassword(data)))
         }
 
@@ -143,9 +143,8 @@ abstract class DataTable(private var path: String? = null,
                 "p" -> dataList[id].password
                 else -> ""
             }
-        }
-        catch (e: Exception){
-            when(e){
+        } catch (e: Exception) {
+            when (e) {
                 is IndexOutOfBoundsException -> "/error: outOfBounds"
                 else -> "/error: unhandledException"
             }
@@ -161,9 +160,9 @@ abstract class DataTable(private var path: String? = null,
     fun searchByData(query: String): List<DataItem> {
         val results = mutableListOf<DataItem>()
         val queryLowerCase = query.toLowerCase()
-        for ((id, data) in dataList.withIndex()){
+        for ((id, data) in dataList.withIndex()) {
             if (data.note.toLowerCase().contains(queryLowerCase) || data.login.toLowerCase().contains(queryLowerCase))
-                    results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
+                results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
         }
 
         return results
@@ -177,7 +176,7 @@ abstract class DataTable(private var path: String? = null,
      */
     fun searchByTag(query: String): List<DataItem> {
         val results = mutableListOf<DataItem>()
-        for ((id, data) in dataList.withIndex()){
+        for ((id, data) in dataList.withIndex()) {
             if (data.tag.contains(query)) results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
         }
 
@@ -188,31 +187,31 @@ abstract class DataTable(private var path: String? = null,
      * Decrypt and parse data from [cryptData].
      *
      * @return [0] – success, [2] – unsupported file version, [3] – invalid password,
-     * [-2] – file is corrupted / unhandled exception
+     * [4] - the master password was not specified, [-2] – file is corrupted / unhandled exception
      * @see AesObj
      */
     fun open(): Int {
         dataList.clear()
-        if (!masterPass.isNullOrEmpty()) {
-            /* Checking the file version. */
-            when(cryptData[0]){
-                FileVersion.VER_2_TYPE_A.char() -> {
-                    try {
-                        /* Decrypting data. */
-                        val data = AesObj.decrypt(cryptData.removeRange(0, 1), masterPass!!)
-                        if (data == "/error") return 3
-                        /* Parsing data by template: tag \t note \t login \t password \n. */
-                        for (list in data.split("\n")) {
-                            val strs = list.split("\t")
-                            dataList.add(DataItem(strs[0], strs[1], strs[2], strs[3]))
-                        }
+        if (masterPass.isNullOrEmpty()) {
+            return 4
+        }
+        /* Checking the file version. */
+        when (cryptData[0]) {
+            FileVersion.VER_2_TYPE_A.char() -> {
+                try {
+                    /* Decrypting data. */
+                    val data = AesObj.decrypt(cryptData.removeRange(0, 1), masterPass!!)
+                    if (data == "/error") return 3
+                    /* Parsing data by template: tag \t note \t login \t password \n. */
+                    for (list in data.split("\n")) {
+                        val strs = list.split("\t")
+                        dataList.add(DataItem(strs[0], strs[1], strs[2], strs[3]))
                     }
-                    catch (e:Exception){
-                        return -2
-                    }
+                } catch (e: Exception) {
+                    return -2
                 }
-                else -> return 2
             }
+            else -> return 2
         }
         isSaved = true
         return 0
@@ -235,35 +234,31 @@ abstract class DataTable(private var path: String? = null,
         masterPass = newMasterPass ?: return 6
         /* Combining data by template: tag \t note \t login \t password \n. */
         var res = ""
-        for (data in dataList) res+= data.tag + "\t" + data.note + "\t" + data.login + "\t" +
+        for (data in dataList) res += data.tag + "\t" + data.note + "\t" + data.login + "\t" +
                 data.password + "\n"
         res = res.dropLast(1) // the last line doesn't contain char "\n"
         var strToSave = CurrentVersionFileA.char().toString()
         /* Encrypting data. */
         try {
-            val encrypt =AesObj.encrypt(res, masterPass!!)
+            val encrypt = AesObj.encrypt(res, masterPass!!)
             val decrypt = AesObj.decrypt(encrypt, masterPass!!) // verification of encryption success
-            if (decrypt == res) strToSave+= encrypt // add version char
+            if (decrypt == res) strToSave += encrypt // add version char
             else return 2
-        }
-        catch (e:Exception){
+        } catch (e: Exception) {
             return -2
         }
         /* Saving encrypted data to the file. */
         try {
             writeToFile(path!!, strToSave)
-        }
-        catch (e:Exception){
+        } catch (e: Exception) {
             try {
-                val originalName = path!!.substringAfterLast("\\").
-                substringBeforeLast(".").plus(".passtable")
+                val originalName = path!!.substringAfterLast("\\").substringBeforeLast(".").plus(".passtable")
                 writeToFile(originalName, strToSave) // attempt to save the file near the app itself.
                 path = originalName
                 isSaved = true // reset the flag
                 dataListLastSave.clear(); dataListLastSave.addAll(dataList) // updating the last saved version
                 return 3
-            }
-            catch (e: Exception){
+            } catch (e: Exception) {
                 return -3
             }
         }
@@ -277,7 +272,7 @@ abstract class DataTable(private var path: String? = null,
      *
      * @see dataList
      */
-    fun rollback(){
+    fun rollback() {
         dataList.clear()
         dataList.addAll(dataListLastSave)
         isSaved = true
