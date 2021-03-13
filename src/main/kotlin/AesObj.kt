@@ -33,13 +33,13 @@ object AesObj {
     private fun cryptoProcessor(isEncryption: Boolean, data: String, password: String): String {
         var passwordFull = password
         val cipher: BufferedBlockCipher = PaddedBufferedBlockCipher(
-            CBCBlockCipher(AESEngine()), PKCS7Padding())
+            CBCBlockCipher(AESEngine()), PKCS7Padding()
+        )
         /* Padding the password to a length of 16, 24, or 32 characters. */
-        var iKeyPadding = 0
-        val newPassLength: Int
         if (passwordFull.length > 32 || passwordFull.isEmpty())
             throw Exception("The password contains 0 or more than 32 characters.")
-        newPassLength = if (passwordFull.length <= 16) 16 else if (passwordFull.length <= 24) 24 else 32
+        val newPassLength = if (passwordFull.length <= 16) 16 else if (passwordFull.length <= 24) 24 else 32
+        var iKeyPadding = 0
         val passwordBuilder = StringBuilder(passwordFull)
         while (passwordBuilder.length < newPassLength) passwordBuilder.append(keyPadding[iKeyPadding++])
         passwordFull = passwordBuilder.toString()
@@ -64,13 +64,12 @@ object AesObj {
         cipher.init(isEncryption, ParametersWithIV(KeyParameter(passwordBytes), iv))
         val result = ByteArray(cipher.getOutputSize(msg.size))
         val outOff = cipher.processBytes(msg, 0, msg.size, result, 0)
-        val strResult: String
-        strResult = try {
+        val strResult = try {
             cipher.doFinal(result, outOff)
             if (isEncryption) Base64.toBase64String(Arrays.concatenate(result, iv)) else String(
                 result,
                 StandardCharsets.UTF_8
-            ).trim { it <= ' ' }
+            )
         } catch (e: IllegalStateException) {
             "/error"
         } catch (e: DataLengthException) {
