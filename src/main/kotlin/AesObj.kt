@@ -69,7 +69,7 @@ object AesObj {
             if (isEncryption) Base64.toBase64String(Arrays.concatenate(result, iv)) else String(
                 result,
                 StandardCharsets.UTF_8
-            )
+            ).trim { it == '\u0000' }
         } catch (e: IllegalStateException) {
             "/error"
         } catch (e: DataLengthException) {
