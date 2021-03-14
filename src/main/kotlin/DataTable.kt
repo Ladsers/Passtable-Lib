@@ -202,6 +202,10 @@ abstract class DataTable(
                     /* Decrypting data. */
                     val data = AesObj.decrypt(cryptData.removeRange(0, 1), masterPass!!)
                     if (data == "/error") return 3
+                    if (data == "/emptyCollection") {
+                        isSaved = true
+                        return 0 // if collection is empty, then parsing is not needed for further work
+                    }
                     /* Parsing data by template: tag \t note \t login \t password \n. */
                     for (list in data.split("\n")) {
                         val strs = list.split("\t")
@@ -223,22 +227,27 @@ abstract class DataTable(
      * It is possible to save the file with new [path] and new [masterPass].
      * @return [0] – success, [2] – the saved data does not match the current data,
      * [-2] – encryption error, [3] – saved in the same directory as the app,
-     * [4] – empty data, [-3] – error writing to file, [5] - the path to the file for save was not specified,
+     * [-3] – error writing to file, [5] - the path to the file for save was not specified,
      * [6] - the master password was not specified.
      * @see AesObj
      */
     fun save(newPath: String? = path, newMasterPass: String? = masterPass): Int {
-        if (dataList.isEmpty()) return 4
         /* Checking for missing information. */
         path = newPath ?: return 5
         masterPass = newMasterPass ?: return 6
-        /* Combining data by template: tag \t note \t login \t password \n. */
+        /* Preparing data for saving. */
         var res = ""
-        for (data in dataList) res += data.tag + "\t" + data.note + "\t" + data.login + "\t" +
-                data.password + "\n"
-        res = res.dropLast(1) // the last line doesn't contain char "\n"
-        var strToSave = CurrentVersionFileA.char().toString()
+        if (dataList.isNotEmpty()){
+            /* Combining data by template: tag \t note \t login \t password \n. */
+            for (data in dataList) res += data.tag + "\t" + data.note + "\t" + data.login + "\t" +
+                    data.password + "\n"
+            res = res.dropLast(1) // the last line doesn't contain char "\n"
+        }
+        else {
+            res = "/emptyCollection"
+        }
         /* Encrypting data. */
+        var strToSave = CurrentVersionFileA.char().toString()
         try {
             val encrypt = AesObj.encrypt(res, masterPass!!)
             val decrypt = AesObj.decrypt(encrypt, masterPass!!) // verification of encryption success
