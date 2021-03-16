@@ -88,17 +88,61 @@ abstract class DataTable(
      *
      * [key]: t -> tag, n -> note, l -> login, p -> password.
      * @return [0] – success, [1] – wrong key, [-2] – IndexOutOfBoundsException,
+     * [2] - note is empty and/or login & password is empty, [3] - wrong tag,
      * [-1] – unhandled exception.
      * @see dataList
      */
     fun setData(id: Int, key: String, new: String): Int {
         try {
+            val oldNote = dataList[id].note
+            val oldLogin = dataList[id].login
+            val oldPassword = dataList[id].password
             when (key) {
-                "t" -> dataList[id].tag = new
-                "n" -> dataList[id].note = new
-                "l" -> dataList[id].login = new
-                "p" -> dataList[id].password = new
+                "t" -> {
+                    if (new !in "0".."5"  || new.length != 1) return 3
+                    dataList[id].tag = new
+                }
+                "n" -> {
+                    if (new.isEmpty() && (oldLogin.isEmpty() || oldPassword.isEmpty())) return 2
+                    dataList[id].note = new
+                }
+                "l" -> {
+                    if (oldNote.isEmpty() && (new.isEmpty() || oldPassword.isEmpty())) return 2
+                    dataList[id].login = new
+                }
+                "p" -> {
+                    if (oldNote.isEmpty() && (oldLogin.isEmpty() || new.isEmpty())) return 2
+                    dataList[id].password = new
+                }
                 else -> return 1
+            }
+            isSaved = false
+        } catch (e: Exception) {
+            return when (e) {
+                is IndexOutOfBoundsException -> -2
+                else -> -1
+            }
+        }
+        return 0
+    }
+
+    /**
+     * Write new data: [nTag], [nNote], [nLogin], [nPassword] instead of the old for one item found by [id].
+     *
+     * @return [0] – success, [1] – wrong key, [-2] – IndexOutOfBoundsException,
+     * [2] - note is empty and/or login & password is empty, [3] - wrong tag,
+     * [-1] – unhandled exception.
+     * @see dataList
+     */
+    fun setData(id: Int, nTag: String, nNote: String, nLogin: String, nPassword: String): Int {
+        if (nNote.isEmpty() && (nLogin.isEmpty() || nPassword.isEmpty())) return 2
+        if (nTag !in "0".."5"  || nTag.length != 1) return 3
+        try {
+            dataList[id].apply {
+                tag = nTag
+                note = nNote
+                login = nLogin
+                password = nPassword
             }
             isSaved = false
         } catch (e: Exception) {
