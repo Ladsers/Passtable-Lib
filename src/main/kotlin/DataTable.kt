@@ -169,7 +169,7 @@ abstract class DataTable(
     }
 
     /**
-     * Get collection where tag contain the following search [query].
+     * Get collection where tag contains the following search [query].
      *
      * @return the filtered collection.
      * @see dataList
@@ -178,6 +178,32 @@ abstract class DataTable(
         val results = mutableListOf<DataItem>()
         for ((id, data) in dataList.withIndex()) {
             if (data.tag.contains(query)) results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
+        }
+
+        return results
+    }
+
+    /**
+     * Get collection where tags contain selected colors ([red], [green], [blue], [yellow], [purple]).
+     *
+     * @return the filtered collection.
+     * @see dataList
+     */
+    fun searchByTag(
+        red: Boolean = false,
+        green: Boolean = false,
+        blue: Boolean = false,
+        yellow: Boolean = false,
+        purple: Boolean = false
+    ): List<DataItem> {
+        val results = mutableListOf<DataItem>()
+        for ((id, data) in dataList.withIndex()) {
+            when (true) {
+                red && data.tag.contains("1"), green && data.tag.contains("2"),
+                blue && data.tag.contains("3"), yellow && data.tag.contains("4"),
+                purple && data.tag.contains("5") ->
+                    results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
+            }
         }
 
         return results
