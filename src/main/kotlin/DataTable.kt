@@ -53,12 +53,13 @@ abstract class DataTable(
     /**
      * Add an item to the main collection.
      *
-     * @return [0] - success, [1] - note is empty and/or login & password is empty.
+     * @return [0] - success, [1] - note is empty and/or login & password is empty,
+     * [2] - wrong tag.
      * @see dataList
      */
     fun add(tag: String, note: String, login: String, password: String): Int {
         if (note.isEmpty() && (login.isEmpty() || password.isEmpty())) return 1
-
+        if (nTag !in "0".."5"  || nTag.length != 1) return 2
         dataList.add(DataItem(tag, note, login, password))
         isSaved = false
         return 0
