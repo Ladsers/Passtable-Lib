@@ -59,7 +59,7 @@ abstract class DataTable(
      */
     fun add(tag: String, note: String, login: String, password: String): Int {
         if (note.isEmpty() && (login.isEmpty() || password.isEmpty())) return 1
-        if (nTag !in "0".."5"  || nTag.length != 1) return 2
+        if (tag !in "0".."5"  || tag.length != 1) return 2
         dataList.add(DataItem(tag, note, login, password))
         isSaved = false
         return 0
@@ -71,7 +71,7 @@ abstract class DataTable(
      * @return [0] – success, [-2] – IndexOutOfBoundsException, [-1] – unhandled exception.
      * @see dataList
      */
-    fun delete(id: Int): Int {
+    fun remove(id: Int): Int {
         try {
             dataList.removeAt(id)
             isSaved = false
