@@ -16,7 +16,7 @@ class DataItem(var tag: String, var note: String, var login: String, var passwor
  */
 abstract class DataTable(
     private var path: String? = null,
-    private var masterPass: String? = null, private val cryptData: String = " "
+    private var masterPass: String? = null, private val cryptData: String = ""
 ) {
     /**
      * The main collection containing all items (all user data).
@@ -263,9 +263,9 @@ abstract class DataTable(
      */
     fun open(): Int {
         dataList.clear()
-        if (masterPass.isNullOrEmpty()) {
-            return 4
-        }
+        if (masterPass.isNullOrEmpty()) return 4
+        if (cryptData.isEmpty()) return -2
+
         /* Checking the file version. */
         when (cryptData[0]) {
             FileVersion.VER_2_TYPE_A.char() -> {
