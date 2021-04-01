@@ -280,9 +280,10 @@ abstract class DataTable(
                     /* Parsing data by template: tag \t note \t login \t password \n. */
                     for (list in data.split("\n")) {
                         val strs = list.split("\t")
-                        dataList.add(DataItem(strs[0], strs[1], strs[2], strs[3]))
+                        val item = DataItem(strs[0], strs[1], strs[2], strs[3])
+                        dataList.add(item)
+                        dataListLastSave.add(item)
                     }
-                    dataListLastSave.addAll(dataList)
                 } catch (e: Exception) {
                     return -2
                 }
