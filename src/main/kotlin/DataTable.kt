@@ -282,6 +282,7 @@ abstract class DataTable(
                         val strs = list.split("\t")
                         dataList.add(DataItem(strs[0], strs[1], strs[2], strs[3]))
                     }
+                    dataListLastSave.addAll(dataList)
                 } catch (e: Exception) {
                     return -2
                 }
