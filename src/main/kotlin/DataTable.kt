@@ -16,21 +16,24 @@ class DataItem(var tag: String, var note: String, var login: String, var passwor
  */
 abstract class DataTable(
     private var path: String? = null,
-    private var masterPass: String? = null, private val cryptData: String = ""
+    private var masterPass: String? = null, private var cryptData: String = ""
 ) {
+    /**
+     * Initialization block.
+     *
+     * Automatically fill the main collection with data, if available and the master password is specified.
+     * @see fill
+     */
+    init {
+        if (!masterPass.isNullOrEmpty() && cryptData.isNotEmpty()) fill()
+    }
+
     /**
      * The main collection containing all items (all user data).
      *
      * @see DataItem
      */
     private val dataList = mutableListOf<DataItem>()
-
-    /**
-     * The last saved collection of items.
-     *
-     * @see DataItem
-     */
-    private val dataListLastSave = mutableListOf<DataItem>()
 
     /**
      * Mask a password.
@@ -59,7 +62,7 @@ abstract class DataTable(
      */
     fun add(tag: String, note: String, login: String, password: String): Int {
         if (note.isEmpty() && (login.isEmpty() || password.isEmpty())) return 1
-        if (tag !in "0".."5"  || tag.length != 1) return 2
+        if (tag !in "0".."5" || tag.length != 1) return 2
         dataList.add(DataItem(tag, note, login, password))
         isSaved = false
         return 0
@@ -100,7 +103,7 @@ abstract class DataTable(
             val oldPassword = dataList[id].password
             when (key) {
                 "t" -> {
-                    if (new !in "0".."5"  || new.length != 1) return 3
+                    if (new !in "0".."5" || new.length != 1) return 3
                     dataList[id].tag = new
                 }
                 "n" -> {
@@ -137,7 +140,7 @@ abstract class DataTable(
      */
     fun setData(id: Int, nTag: String, nNote: String, nLogin: String, nPassword: String): Int {
         if (nNote.isEmpty() && (nLogin.isEmpty() || nPassword.isEmpty())) return 2
-        if (nTag !in "0".."5"  || nTag.length != 1) return 3
+        if (nTag !in "0".."5" || nTag.length != 1) return 3
         try {
             dataList[id].apply {
                 tag = nTag
@@ -255,13 +258,13 @@ abstract class DataTable(
     }
 
     /**
-     * Decrypt and parse data from [cryptData].
+     * Fill the main collection with the latest saved data (decrypt and parse data from [cryptData]).
      *
      * @return [0] – success, [2] – unsupported file version, [3] – invalid password,
-     * [4] - the master password was not specified, [-2] – file is corrupted / unhandled exception
+     * [4] - the master password was not specified, [-2] – file is corrupted / unhandled exception.
      * @see AesObj
      */
-    fun open(): Int {
+    fun fill(): Int {
         dataList.clear()
         if (masterPass.isNullOrEmpty()) return 4
         if (cryptData.isEmpty()) return -2
@@ -282,7 +285,6 @@ abstract class DataTable(
                         val strs = list.split("\t")
                         val item = DataItem(strs[0], strs[1], strs[2], strs[3])
                         dataList.add(item)
-                        dataListLastSave.add(item)
                     }
                 } catch (e: Exception) {
                     return -2
@@ -310,13 +312,12 @@ abstract class DataTable(
         masterPass = newMasterPass ?: return 6
         /* Preparing data for saving. */
         var res = ""
-        if (dataList.isNotEmpty()){
+        if (dataList.isNotEmpty()) {
             /* Combining data by template: tag \t note \t login \t password \n. */
             for (data in dataList) res += data.tag + "\t" + data.note + "\t" + data.login + "\t" +
                     data.password + "\n"
             res = res.dropLast(1) // the last line doesn't contain char "\n"
-        }
-        else {
+        } else {
             res = "/emptyCollection"
         }
         /* Encrypting data. */
@@ -337,27 +338,16 @@ abstract class DataTable(
                 val originalName = path!!.substringAfterLast("\\").substringBeforeLast(".").plus(".passtable")
                 writeToFile(originalName, strToSave) // attempt to save the file near the app itself.
                 path = originalName
+                cryptData = strToSave // update class property
                 isSaved = true // reset the flag
-                dataListLastSave.clear(); dataListLastSave.addAll(dataList) // updating the last saved version
                 return 3
             } catch (e: Exception) {
                 return -3
             }
         }
+        cryptData = strToSave // update class property
         isSaved = true // reset the flag
-        dataListLastSave.clear(); dataListLastSave.addAll(dataList) // updating the last saved version
         return 0
-    }
-
-    /**
-     * Roll back the main collection to the last saved version.
-     *
-     * @see dataList
-     */
-    fun rollback() {
-        dataList.clear()
-        dataList.addAll(dataListLastSave)
-        isSaved = true
     }
 
     /**
