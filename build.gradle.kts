@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "1.4.32"
 }
 group = "com.ladsers.passtable"
-version = "1.5.0"
+version = "1.5.1"
 
 repositories {
     mavenCentral()

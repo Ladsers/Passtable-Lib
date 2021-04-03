@@ -19,16 +19,6 @@ abstract class DataTable(
     private var masterPass: String? = null, private var cryptData: String = ""
 ) {
     /**
-     * Initialization block.
-     *
-     * Automatically fill the main collection with data, if available and the master password is specified.
-     * @see fill
-     */
-    init {
-        if (!masterPass.isNullOrEmpty() && cryptData.isNotEmpty()) fill()
-    }
-
-    /**
      * The main collection containing all items (all user data).
      *
      * @see DataItem
