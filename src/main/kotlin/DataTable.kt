@@ -349,6 +349,14 @@ abstract class DataTable(
     fun getPath() = path
 
     /**
+     * Get the size of the main collection.
+     *
+     * @return the size of the main collection.
+     * @see dataList
+     */
+    fun getSize() = dataList.size
+
+    /**
      * The process of writing encrypted information to the passtable-file.
      *
      * Abstract because it can be specific to some OS.
