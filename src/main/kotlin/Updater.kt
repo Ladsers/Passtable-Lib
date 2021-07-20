@@ -26,7 +26,7 @@ object Updater {
             val lines = mutableListOf<String>()
             while (s.hasNextLine()) lines.add(s.next())
 
-            isNeedUpdate = when (platform.toLowerCase()) {
+            isNeedUpdate = when (platform.lowercase()) {
                 "jvm" -> {
                     lastVer = lines[1]
                     verTag != lines[1]

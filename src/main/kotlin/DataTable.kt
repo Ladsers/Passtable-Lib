@@ -197,9 +197,9 @@ abstract class DataTable(
      */
     fun searchByData(query: String): List<DataItem> {
         val results = mutableListOf<DataItem>()
-        val queryLowerCase = query.toLowerCase()
+        val queryLowerCase = query.lowercase()
         for ((id, data) in dataList.withIndex()) {
-            if (data.note.toLowerCase().contains(queryLowerCase) || data.login.toLowerCase().contains(queryLowerCase))
+            if (data.note.lowercase().contains(queryLowerCase) || data.login.lowercase().contains(queryLowerCase))
                 results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
         }
 
