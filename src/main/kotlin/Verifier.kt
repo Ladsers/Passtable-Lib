@@ -6,7 +6,7 @@ object Verifier {
      * Verify [masterPass]word.
      *
      * @return [0] - the master password is correct, [1] - the master password is empty,
-     * [2] - the master password contains forbidden character, [3] - the master password starts with "/" (unacceptable),
+     * [2] - the master password contains invalid character, [3] - the master password starts with "/" (unacceptable),
      * [4] - the master password is too long.
      */
     fun verifyMp(masterPass: String): Int {
@@ -31,8 +31,8 @@ object Verifier {
      * Verify file [name].
      *
      * @return [0] - the file name is correct, [1] - the file name is blank,
-     * [2] - the file name contains forbidden character, [3] - the file name starts with whitespace character,
-     * [4] - the file name is forbidden word for OS Windows, [5] - the file name is too long.
+     * [2] - the file name contains invalid characters, [3] - the file name starts with whitespace character,
+     * [4] - the file name is invalid word for OS Windows, [5] - the file name is too long.
      */
     fun verifyFileName(name: String): Int {
         return when (true) {
@@ -46,12 +46,12 @@ object Verifier {
     }
 
     /**
-     * Forbidden characters of Unix & OS Windows for the file name.
+     * Invalid characters of Unix & OS Windows for the file name.
      */
-    const val fileNameProhibitedChars = "\\ / : * ? \" < > |"
+    const val fileNameInvalidChars = "\\ / : * ? \" < > |"
 
     /**
-     * Forbidden words of OS Windows for the file name.
+     * Invalid words of OS Windows for the file name.
      */
-    const val fileNameProhibitedWinWords = "COM0..COM9 LPT0..LPT9 CON PRN AUX NUL CONIN\$ CONOUT\$"
+    const val fileNameInvalidWinWords = "COM0..COM9 LPT0..LPT9 CON PRN AUX NUL CONIN\$ CONOUT\$"
 }
