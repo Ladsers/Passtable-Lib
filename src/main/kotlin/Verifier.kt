@@ -30,16 +30,17 @@ object Verifier {
     /**
      * Verify file [name].
      *
-     * @return [0] - the file name is correct, [1] - the file name is empty,
-     * [2] - the file name contains forbidden character, [3] - the file name is forbidden word for OS Windows,
-     * [4] - the file name is too long.
+     * @return [0] - the file name is correct, [1] - the file name is blank,
+     * [2] - the file name contains forbidden character, [3] - the file name starts with whitespace character,
+     * [4] - the file name is forbidden word for OS Windows, [5] - the file name is too long.
      */
     fun verifyFileName(name: String): Int {
         return when (true) {
-            name.isEmpty() -> 1
+            name.isBlank() -> 1
             name.contains("[\\x00-\\x1F/\\\\:*?\"<>|]".toRegex()) -> 2
-            name.matches("(?i)(^(COM[0-9]|LPT[0-9]|CON|CONIN\\\$|CONOUT\\\$|PRN|AUX|NUL))".toRegex()) -> 3
-            name.length > 200 -> 4
+            name.startsWith(" ") -> 3
+            name.matches("(?i)(^(COM[0-9]|LPT[0-9]|CON|CONIN\\\$|CONOUT\\\$|PRN|AUX|NUL))".toRegex()) -> 4
+            name.length > 200 -> 5
             else -> 0
         }
     }
