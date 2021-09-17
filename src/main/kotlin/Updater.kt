@@ -7,7 +7,8 @@ import java.util.*
  * An object responsible for updating applications (jvm & android).
  */
 object Updater {
-    private val urlUpdate = URL("""https://raw.githubusercontent.com/Ladsers/temp-files/master/update.ini""")
+    private val urlUpdate =
+        URL("""https://https://raw.githubusercontent.com/Ladsers/temp-files/master/apps_current_version.ini""")
     private lateinit var lastVer: String
 
     /**
