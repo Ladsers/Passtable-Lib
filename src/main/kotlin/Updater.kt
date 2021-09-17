@@ -8,7 +8,7 @@ import java.util.*
  */
 object Updater {
     private val urlUpdate =
-        URL("""https://https://raw.githubusercontent.com/Ladsers/temp-files/master/apps_current_version.ini""")
+        URL("""https://raw.githubusercontent.com/Ladsers/temp-files/master/apps_current_version.ini""")
     private lateinit var lastVer: String
 
     /**
