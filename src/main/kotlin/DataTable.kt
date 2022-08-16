@@ -37,14 +37,14 @@ abstract class DataTable(
     /**
      * Add an item to the main collection.
      *
-     * @return [0] - success, [1] - note is empty and/or login & password is empty,
+     * @return [0] - success, [1] - note is empty and/or username & password is empty,
      * [2] - wrong tag.
      * @see dataList
      */
-    fun add(tag: String, note: String, login: String, password: String): Int {
-        if (note.isEmpty() && (login.isEmpty() || password.isEmpty())) return 1
+    fun add(tag: String, note: String, username: String, password: String): Int {
+        if (note.isEmpty() && (username.isEmpty() || password.isEmpty())) return 1
         if (tag !in "0".."5" || tag.length != 1) return 2
-        dataList.add(DataItem(tag, note, login, password))
+        dataList.add(DataItem(tag, note, username, password))
         isSaved = false
         return 0
     }
@@ -71,16 +71,16 @@ abstract class DataTable(
     /**
      * Write [new] data instead of the old for one item found by [id].
      *
-     * [key]: t -> tag, n -> note, l -> login, p -> password.
+     * [key]: t -> tag, n -> note, u -> username, p -> password.
      * @return [0] – success, [1] – wrong key, [-2] – IndexOutOfBoundsException,
-     * [2] - note is empty and/or login & password is empty, [3] - wrong tag,
+     * [2] - note is empty and/or username & password is empty, [3] - wrong tag,
      * [-1] – unhandled exception.
      * @see dataList
      */
     fun setData(id: Int, key: String, new: String): Int {
         try {
             val oldNote = dataList[id].note
-            val oldLogin = dataList[id].login
+            val oldUsername = dataList[id].username
             val oldPassword = dataList[id].password
             when (key) {
                 "t" -> {
@@ -88,15 +88,15 @@ abstract class DataTable(
                     dataList[id].tag = new
                 }
                 "n" -> {
-                    if (new.isEmpty() && (oldLogin.isEmpty() || oldPassword.isEmpty())) return 2
+                    if (new.isEmpty() && (oldUsername.isEmpty() || oldPassword.isEmpty())) return 2
                     dataList[id].note = new
                 }
-                "l" -> {
+                "u" -> {
                     if (oldNote.isEmpty() && (new.isEmpty() || oldPassword.isEmpty())) return 2
-                    dataList[id].login = new
+                    dataList[id].username = new
                 }
                 "p" -> {
-                    if (oldNote.isEmpty() && (oldLogin.isEmpty() || new.isEmpty())) return 2
+                    if (oldNote.isEmpty() && (oldUsername.isEmpty() || new.isEmpty())) return 2
                     dataList[id].password = new
                 }
                 else -> return 1
@@ -112,21 +112,21 @@ abstract class DataTable(
     }
 
     /**
-     * Write new data: [nTag], [nNote], [nLogin], [nPassword] instead of the old for one item found by [id].
+     * Write new data: [nTag], [nNote], [nUsername], [nPassword] instead of the old for one item found by [id].
      *
      * @return [0] – success, [1] – wrong key, [-2] – IndexOutOfBoundsException,
-     * [2] - note is empty and/or login & password is empty, [3] - wrong tag,
+     * [2] - note is empty and/or username & password is empty, [3] - wrong tag,
      * [-1] – unhandled exception.
      * @see dataList
      */
-    fun setData(id: Int, nTag: String, nNote: String, nLogin: String, nPassword: String): Int {
-        if (nNote.isEmpty() && (nLogin.isEmpty() || nPassword.isEmpty())) return 2
+    fun setData(id: Int, nTag: String, nNote: String, nUsername: String, nPassword: String): Int {
+        if (nNote.isEmpty() && (nUsername.isEmpty() || nPassword.isEmpty())) return 2
         if (nTag !in "0".."5" || nTag.length != 1) return 3
         try {
             dataList[id].apply {
                 tag = nTag
                 note = nNote
-                login = nLogin
+                username = nUsername
                 password = nPassword
             }
             isSaved = false
@@ -149,7 +149,7 @@ abstract class DataTable(
     fun getData(): MutableList<DataItem> {
         val results = mutableListOf<DataItem>()
         for (data in dataList) {
-            results.add(DataItem(data.tag, data.note, data.login, hasPassword(data)))
+            results.add(DataItem(data.tag, data.note, data.username, hasPassword(data)))
         }
 
         return results
@@ -158,7 +158,7 @@ abstract class DataTable(
     /**
      * Get data from one item found by [id].
      *
-     * [key]: t -> tag, n -> note, l -> login, p -> password.
+     * [key]: t -> tag, n -> note, u -> username, p -> password.
      * @return [value] – success, [] – wrong key, [/error: outOfBounds] – IndexOutOfBoundsException,
      * [/error: unhandledException] – unhandled exception.
      * @see dataList
@@ -168,7 +168,7 @@ abstract class DataTable(
             when (key) {
                 "t" -> dataList[id].tag
                 "n" -> dataList[id].note
-                "l" -> dataList[id].login
+                "u" -> dataList[id].username
                 "p" -> dataList[id].password
                 else -> ""
             }
@@ -181,7 +181,7 @@ abstract class DataTable(
     }
 
     /**
-     * Get collection where notes and/or logins contain the following search [query].
+     * Get collection where notes and/or usernames contain the following search [query].
      *
      * @return the filtered collection.
      * @see dataList
@@ -190,8 +190,8 @@ abstract class DataTable(
         val results = mutableListOf<DataItem>()
         val queryLowerCase = query.lowercase()
         for ((id, data) in dataList.withIndex()) {
-            if (data.note.lowercase().contains(queryLowerCase) || data.login.lowercase().contains(queryLowerCase))
-                results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
+            if (data.note.lowercase().contains(queryLowerCase) || data.username.lowercase().contains(queryLowerCase))
+                results.add(DataItem(data.tag, data.note, data.username, hasPassword(data), id))
         }
 
         return results
@@ -206,7 +206,7 @@ abstract class DataTable(
     fun searchByTag(query: String): List<DataItem> {
         val results = mutableListOf<DataItem>()
         for ((id, data) in dataList.withIndex()) {
-            if (data.tag.contains(query)) results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
+            if (data.tag.contains(query)) results.add(DataItem(data.tag, data.note, data.username, hasPassword(data), id))
         }
 
         return results
@@ -231,7 +231,7 @@ abstract class DataTable(
                 (blue && data.tag.contains("3")) || (yellow && data.tag.contains("4")) ||
                 (purple && data.tag.contains("5"))
             )
-                results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
+                results.add(DataItem(data.tag, data.note, data.username, hasPassword(data), id))
         }
 
         return results
@@ -260,7 +260,7 @@ abstract class DataTable(
                         isSaved = true
                         return 0 // if collection is empty, then parsing is not needed for further work
                     }
-                    /* Parsing data by template: tag \t note \t login \t password \n. */
+                    /* Parsing data by template: tag \t note \t username \t password \n. */
                     for (list in data.split("\n")) {
                         val strs = list.split("\t")
                         val item = DataItem(strs[0], strs[1], strs[2], strs[3])
@@ -293,8 +293,8 @@ abstract class DataTable(
         /* Preparing data for saving. */
         val res: String = if (dataList.isNotEmpty()) {
             val strBuilder = StringBuilder()
-            /* Combining data by template: tag \t note \t login \t password \n. */
-            for (data in dataList) strBuilder.append("${data.tag}\t${data.note}\t${data.login}\t${data.password}\n")
+            /* Combining data by template: tag \t note \t username \t password \n. */
+            for (data in dataList) strBuilder.append("${data.tag}\t${data.note}\t${data.username}\t${data.password}\n")
             strBuilder.toString().dropLast(1) // the last line doesn't contain char "\n"
         } else {
             "/emptyCollection"
