@@ -24,6 +24,17 @@ abstract class DataTable(
      */
     private fun hasPassword(dataItem: DataItem) = if (dataItem.password.isNotEmpty()) "/yes" else "/no"
 
+    companion object {
+        /**
+         * Check the data for the suitability of adding to the collection.
+         *
+         * @return can the data be added to the collection?
+         * @see dataList
+         */
+        fun checkData(note: String, username: String, password: String) =
+            note.isNotBlank() || (username.isNotBlank() && password.isNotEmpty())
+    }
+
     /**
      * Save flag.
      *
@@ -42,7 +53,7 @@ abstract class DataTable(
      * @see dataList
      */
     fun add(tag: String, note: String, username: String, password: String): Int {
-        if (note.isEmpty() && (username.isEmpty() || password.isEmpty())) return 1
+        if (!checkData(note, username, password)) return 1
         if (tag !in "0".."5" || tag.length != 1) return 2
         dataList.add(DataItem(tag, note, username, password))
         isSaved = false
@@ -100,7 +111,7 @@ abstract class DataTable(
             val username = dataList[id].username
             val password = dataList[id].password
 
-            if (data.isEmpty() && (username.isEmpty() || password.isEmpty())) return 2
+            if (!checkData(data, username, password)) return 2
             dataList[id].note = data
 
             isSaved = false
@@ -124,7 +135,7 @@ abstract class DataTable(
             val note = dataList[id].note
             val password = dataList[id].password
 
-            if (note.isEmpty() && (data.isEmpty() || password.isEmpty())) return 2
+            if (!checkData(note, data, password)) return 2
             dataList[id].username = data
 
             isSaved = false
@@ -148,7 +159,7 @@ abstract class DataTable(
             val note = dataList[id].note
             val username = dataList[id].username
 
-            if (note.isEmpty() && (username.isEmpty() || data.isEmpty())) return 2
+            if (!checkData(note, username, data)) return 2
             dataList[id].password = data
 
             isSaved = false
@@ -170,7 +181,7 @@ abstract class DataTable(
      * @see dataList
      */
     fun setData(id: Int, nTag: String, nNote: String, nUsername: String, nPassword: String): Int {
-        if (nNote.isEmpty() && (nUsername.isEmpty() || nPassword.isEmpty())) return 2
+        if (!checkData(nNote, nUsername, nPassword)) return 2
         if (nTag !in "0".."5" || nTag.length != 1) return 3
         try {
             dataList[id].apply {
