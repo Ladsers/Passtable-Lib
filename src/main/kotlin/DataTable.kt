@@ -1,13 +1,4 @@
 /**
- * A class for storing data of one item.
- *
- * Can store the following data: [tag], [note], [login], [password].
- * Additionally, can store a real [id] when searching.
- * @constructor Initialization with all necessary data is required. Data can be an empty string.
- */
-class DataItem(var tag: String, var note: String, var login: String, var password: String, val id: Int = -1)
-
-/**
  * An abstract class containing all user data and methods for working with them.
  *
  * @constructor When working with data from the file, specify [path] to the file,
@@ -59,12 +50,12 @@ abstract class DataTable(
     }
 
     /**
-     * Remove an item from the main collection by [id].
+     * Delete an item from the main collection by [id].
      *
      * @return [0] – success, [-2] – IndexOutOfBoundsException, [-1] – unhandled exception.
      * @see dataList
      */
-    fun remove(id: Int): Int {
+    fun delete(id: Int): Int {
         try {
             dataList.removeAt(id)
             isSaved = false
@@ -236,12 +227,11 @@ abstract class DataTable(
     ): List<DataItem> {
         val results = mutableListOf<DataItem>()
         for ((id, data) in dataList.withIndex()) {
-            when (true) {
-                red && data.tag.contains("1"), green && data.tag.contains("2"),
-                blue && data.tag.contains("3"), yellow && data.tag.contains("4"),
-                purple && data.tag.contains("5") ->
-                    results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
-            }
+            if ((red && data.tag.contains("1")) || (green && data.tag.contains("2")) ||
+                (blue && data.tag.contains("3")) || (yellow && data.tag.contains("4")) ||
+                (purple && data.tag.contains("5"))
+            )
+                results.add(DataItem(data.tag, data.note, data.login, hasPassword(data), id))
         }
 
         return results
@@ -301,21 +291,20 @@ abstract class DataTable(
         path = newPath ?: return 5
         masterPass = newMasterPass ?: return 6
         /* Preparing data for saving. */
-        var res = ""
-        if (dataList.isNotEmpty()) {
+        val res: String = if (dataList.isNotEmpty()) {
+            val strBuilder = StringBuilder()
             /* Combining data by template: tag \t note \t login \t password \n. */
-            for (data in dataList) res += data.tag + "\t" + data.note + "\t" + data.login + "\t" +
-                    data.password + "\n"
-            res = res.dropLast(1) // the last line doesn't contain char "\n"
+            for (data in dataList) strBuilder.append("${data.tag}\t${data.note}\t${data.login}\t${data.password}\n")
+            strBuilder.toString().dropLast(1) // the last line doesn't contain char "\n"
         } else {
-            res = "/emptyCollection"
+            "/emptyCollection"
         }
         /* Encrypting data. */
-        var strToSave = CurrentVersionFileA.char().toString()
+        val strToSave: String
         try {
             val encrypt = AesObj.encrypt(res, masterPass!!)
             val decrypt = AesObj.decrypt(encrypt, masterPass!!) // verification of encryption success
-            if (decrypt == res) strToSave += encrypt // add version char
+            if (decrypt == res) strToSave = CurrentVersionFileA.char().toString() + encrypt // add version char
             else return 2
         } catch (e: Exception) {
             return -2
