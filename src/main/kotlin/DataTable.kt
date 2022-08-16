@@ -69,38 +69,88 @@ abstract class DataTable(
     }
 
     /**
-     * Write [new] data instead of the old for one item found by [id].
+     * Write new tag instead of the old one for the item found by [id].
      *
-     * [key]: t -> tag, n -> note, u -> username, p -> password.
-     * @return [0] – success, [1] – wrong key, [-2] – IndexOutOfBoundsException,
-     * [2] - note is empty and/or username & password is empty, [3] - wrong tag,
-     * [-1] – unhandled exception.
+     * @return [0] – success, [-2] – IndexOutOfBoundsException, [3] - wrong tag, [-1] – unhandled exception.
      * @see dataList
      */
-    fun setData(id: Int, key: String, new: String): Int {
+    fun setTag(id: Int, data: String): Int {
         try {
-            val oldNote = dataList[id].note
-            val oldUsername = dataList[id].username
-            val oldPassword = dataList[id].password
-            when (key) {
-                "t" -> {
-                    if (new !in "0".."5" || new.length != 1) return 3
-                    dataList[id].tag = new
-                }
-                "n" -> {
-                    if (new.isEmpty() && (oldUsername.isEmpty() || oldPassword.isEmpty())) return 2
-                    dataList[id].note = new
-                }
-                "u" -> {
-                    if (oldNote.isEmpty() && (new.isEmpty() || oldPassword.isEmpty())) return 2
-                    dataList[id].username = new
-                }
-                "p" -> {
-                    if (oldNote.isEmpty() && (oldUsername.isEmpty() || new.isEmpty())) return 2
-                    dataList[id].password = new
-                }
-                else -> return 1
+            if (data !in "0".."5" || data.length != 1) return 3
+            dataList[id].tag = data
+
+            isSaved = false
+        } catch (e: Exception) {
+            return when (e) {
+                is IndexOutOfBoundsException -> -2
+                else -> -1
             }
+        }
+        return 0
+    }
+
+    /**
+     * Write new note instead of the old one for the item found by [id].
+     *
+     * @return [0] – success, [-2] – IndexOutOfBoundsException, [3] - wrong tag, [-1] – unhandled exception.
+     * @see dataList
+     */
+    fun setNote(id: Int, data: String): Int {
+        try {
+            val username = dataList[id].username
+            val password = dataList[id].password
+
+            if (data.isEmpty() && (username.isEmpty() || password.isEmpty())) return 2
+            dataList[id].note = data
+
+            isSaved = false
+        } catch (e: Exception) {
+            return when (e) {
+                is IndexOutOfBoundsException -> -2
+                else -> -1
+            }
+        }
+        return 0
+    }
+
+    /**
+     * Write new username instead of the old one for the item found by [id].
+     *
+     * @return [0] – success, [-2] – IndexOutOfBoundsException, [3] - wrong tag, [-1] – unhandled exception.
+     * @see dataList
+     */
+    fun setUsername(id: Int, data: String): Int {
+        try {
+            val note = dataList[id].note
+            val password = dataList[id].password
+
+            if (note.isEmpty() && (data.isEmpty() || password.isEmpty())) return 2
+            dataList[id].username = data
+
+            isSaved = false
+        } catch (e: Exception) {
+            return when (e) {
+                is IndexOutOfBoundsException -> -2
+                else -> -1
+            }
+        }
+        return 0
+    }
+
+    /**
+     * Write new password instead of the old one for the item found by [id].
+     *
+     * @return [0] – success, [-2] – IndexOutOfBoundsException, [3] - wrong tag, [-1] – unhandled exception.
+     * @see dataList
+     */
+    fun setPassword(id: Int, data: String): Int {
+        try {
+            val note = dataList[id].note
+            val username = dataList[id].username
+
+            if (note.isEmpty() && (username.isEmpty() || data.isEmpty())) return 2
+            dataList[id].password = data
+
             isSaved = false
         } catch (e: Exception) {
             return when (e) {
@@ -156,22 +206,69 @@ abstract class DataTable(
     }
 
     /**
-     * Get data from one item found by [id].
+     * Get tag from item found by [id].
      *
-     * [key]: t -> tag, n -> note, u -> username, p -> password.
-     * @return [value] – success, [] – wrong key, [/error: outOfBounds] – IndexOutOfBoundsException,
+     * @return [value] – success, [/error: outOfBounds] – IndexOutOfBoundsException,
      * [/error: unhandledException] – unhandled exception.
      * @see dataList
      */
-    fun getData(id: Int, key: String): String {
+    fun getTag(id: Int): String {
         return try {
-            when (key) {
-                "t" -> dataList[id].tag
-                "n" -> dataList[id].note
-                "u" -> dataList[id].username
-                "p" -> dataList[id].password
-                else -> ""
+            dataList[id].tag
+        } catch (e: Exception) {
+            when (e) {
+                is IndexOutOfBoundsException -> "/error: outOfBounds"
+                else -> "/error: unhandledException"
             }
+        }
+    }
+
+    /**
+     * Get note from item found by [id].
+     *
+     * @return [value] – success, [/error: outOfBounds] – IndexOutOfBoundsException,
+     * [/error: unhandledException] – unhandled exception.
+     * @see dataList
+     */
+    fun getNote(id: Int): String {
+        return try {
+            dataList[id].note
+        } catch (e: Exception) {
+            when (e) {
+                is IndexOutOfBoundsException -> "/error: outOfBounds"
+                else -> "/error: unhandledException"
+            }
+        }
+    }
+
+    /**
+     * Get username from item found by [id].
+     *
+     * @return [value] – success, [/error: outOfBounds] – IndexOutOfBoundsException,
+     * [/error: unhandledException] – unhandled exception.
+     * @see dataList
+     */
+    fun getUsername(id: Int): String {
+        return try {
+            dataList[id].username
+        } catch (e: Exception) {
+            when (e) {
+                is IndexOutOfBoundsException -> "/error: outOfBounds"
+                else -> "/error: unhandledException"
+            }
+        }
+    }
+
+    /**
+     * Get password from item found by [id]. Use this function only when you need to show the password openly.
+     *
+     * @return [value] – success, [/error: outOfBounds] – IndexOutOfBoundsException,
+     * [/error: unhandledException] – unhandled exception.
+     * @see dataList
+     */
+    fun getPassword(id: Int): String {
+        return try {
+            dataList[id].password
         } catch (e: Exception) {
             when (e) {
                 is IndexOutOfBoundsException -> "/error: outOfBounds"
