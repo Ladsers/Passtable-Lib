@@ -3,14 +3,12 @@ package com.ladsers.passtable.lib
 import java.net.URL
 import java.util.*
 
-// TODO: change /Ladsers/temp-files/ to /Ladsers/Passtable/
-
 /**
- * An object responsible for updating applications (jvm & android).
+ * An object responsible for updating applications. Supported platforms: jvm, android.
  */
 object Updater {
     private val urlUpdate =
-        URL("""https://raw.githubusercontent.com/Ladsers/temp-files/master/apps_current_version.ini""")
+        URL("""https://raw.githubusercontent.com/Ladsers/Passtable-Lib/master/apps_current_version.ini""")
     private lateinit var lastVer: String
 
     /**
@@ -25,7 +23,7 @@ object Updater {
 
         try {
             val s = Scanner(urlUpdate.openStream())
-            s.useDelimiter("[^\\S]")
+            s.useDelimiter("\\s")
             val lines = mutableListOf<String>()
             while (s.hasNextLine()) lines.add(s.next())
 
@@ -34,10 +32,12 @@ object Updater {
                     lastVer = lines[1]
                     verTag != lines[1]
                 }
+
                 "apk" -> {
                     lastVer = lines[3]
                     verTag != lines[3]
                 }
+
                 else -> {
                     lastVer = verTag
                     false

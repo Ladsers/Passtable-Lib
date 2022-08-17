@@ -5,32 +5,42 @@ package com.ladsers.passtable.lib
  */
 object Verifier {
     /**
-     * Verify [masterPass]word.
-     *
-     * @return [0] - the master password is correct, [1] - the master password is empty,
-     * [2] - the master password contains invalid character, [3] - the master password starts with "/" (unacceptable),
-     * [4] - the master password is too long.
+     * Invalid characters of Unix & OS Windows for the file name.
      */
-    fun verifyMp(masterPass: String): Int {
+    const val fileNameInvalidChars = "\\ / : * ? \" < > |"
+
+    /**
+     * Invalid words of OS Windows for the file name.
+     */
+    const val fileNameInvalidWinWords = "COM0..COM9 LPT0..LPT9 CON PRN AUX NUL CONIN\$ CONOUT\$"
+
+    /**
+     * Get string containing allowed characters for use in the primary password.
+     *
+     * @return String containing allowed characters for use in the primary password.
+     */
+    fun getPrimaryAllowedChars(translationForSpace: String = "space") = "A..Z a..z 0..9 $translationForSpace\n" +
+            "@ \$ # % & ~ ! ? = + * - _ . , : ; ' \" ` ^ ( ) < > [ ] { } \\ / |"
+
+    /**
+     * Verify the [primaryPass]word.
+     *
+     * @return [0] - the primary password is correct, [1] - the primary password is empty,
+     * [2] - the primary password contains invalid character, [3] - the primary password starts with "/" (unacceptable),
+     * [4] - the primary password is too long.
+     */
+    fun verifyPrimary(primaryPass: String): Int {
         return when (true) {
-            masterPass.isEmpty() -> 1
-            masterPass.contains("[^ -~]".toRegex()) -> 2
-            masterPass.startsWith("/") -> 3
-            masterPass.length > 32 -> 4
+            primaryPass.isEmpty() -> 1
+            primaryPass.contains("[^ -~]".toRegex()) -> 2
+            primaryPass.startsWith("/") -> 3
+            (primaryPass.length > 32) -> 4
             else -> 0
         }
     }
 
     /**
-     * Get string containing allowed characters for use in the master password.
-     *
-     * @return String containing allowed characters for use in the master password.
-     */
-    fun getMpAllowedChars(translationForSpace: String = "space") = "A..Z a..z 0..9 $translationForSpace\n" +
-            "@ \$ # % & ~ ! ? = + * - _ . , : ; ' \" ` ^ ( ) < > [ ] { } \\ / |"
-
-    /**
-     * Verify file [name].
+     * Verify the file [name].
      *
      * @return [0] - the file name is correct, [1] - the file name is blank,
      * [2] - the file name contains invalid characters, [3] - the file name starts with whitespace character,
@@ -42,7 +52,7 @@ object Verifier {
             name.contains("[\\x00-\\x1F/\\\\:*?\"<>|]".toRegex()) -> 2
             name.startsWith(" ") -> 3
             name.matches("(?i)(^(COM[0-9]|LPT[0-9]|CON|CONIN\\\$|CONOUT\\\$|PRN|AUX|NUL))".toRegex()) -> 4
-            name.length > 200 -> 5
+            (name.length > 200) -> 5
             else -> 0
         }
     }
@@ -56,12 +66,9 @@ object Verifier {
         note.isNotBlank() || (username.isNotBlank() && password.isNotEmpty())
 
     /**
-     * Invalid characters of Unix & OS Windows for the file name.
+     * Verify the tag for the suitability of adding to the item.
+     *
+     * @return can the tag be added to the item?
      */
-    const val fileNameInvalidChars = "\\ / : * ? \" < > |"
-
-    /**
-     * Invalid words of OS Windows for the file name.
-     */
-    const val fileNameInvalidWinWords = "COM0..COM9 LPT0..LPT9 CON PRN AUX NUL CONIN\$ CONOUT\$"
+    fun verifyTag(tag: String) = tag in "0".."5" && tag.length == 1
 }

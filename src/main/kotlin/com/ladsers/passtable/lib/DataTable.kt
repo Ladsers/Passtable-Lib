@@ -1,17 +1,18 @@
 package com.ladsers.passtable.lib
 
 import com.ladsers.passtable.lib.Verifier.verifyData
+import com.ladsers.passtable.lib.Verifier.verifyTag
 
 /**
  * An abstract class containing all user data and methods for working with them.
  *
  * @constructor When working with data from the file, specify [path] to the file,
- * [masterPass] and the encrypted [cryptData] from this file. If the file doesn't exist yet,
+ * [primaryPass] and [encryptedData] from this file. If the file doesn't exist yet,
  * the constructor must be empty.
  */
 abstract class DataTable(
     private var path: String? = null,
-    private var masterPass: String? = null, private var cryptData: String = ""
+    private var primaryPass: String? = null, private var encryptedData: String = ""
 ) {
     /**
      * The main collection containing all items (all user data).
@@ -31,8 +32,8 @@ abstract class DataTable(
     /**
      * Save flag.
      *
-     * It is checked when user safely close the app or open an another file.
-     * It is set every time when user interact with the main collection.
+     * It is checked when user close the app or open another file for safety.
+     * It resets every time when user changes items in the main collection.
      * If true, saving is not required.
      * @see dataList
      */
@@ -43,11 +44,11 @@ abstract class DataTable(
      *
      * @return [0] - success, [1] - note is empty and/or username & password is empty,
      * [2] - wrong tag.
-     * @see dataList
+     * @see Verifier
      */
     fun add(tag: String, note: String, username: String, password: String): Int {
         if (!verifyData(note, username, password)) return 1
-        if (tag !in "0".."5" || tag.length != 1) return 2
+        if (!verifyTag(tag)) return 2
         dataList.add(DataItem(tag, note, username, password))
         isSaved = false
         return 0
@@ -76,11 +77,11 @@ abstract class DataTable(
      * Write new tag instead of the old one for the item found by [id].
      *
      * @return [0] – success, [-2] – IndexOutOfBoundsException, [3] - wrong tag, [-1] – unhandled exception.
-     * @see dataList
+     * @see Verifier.verifyTag
      */
     fun setTag(id: Int, data: String): Int {
         try {
-            if (data !in "0".."5" || data.length != 1) return 3
+            if (!verifyTag(data)) return 3
             dataList[id].tag = data
 
             isSaved = false
@@ -96,8 +97,9 @@ abstract class DataTable(
     /**
      * Write new note instead of the old one for the item found by [id].
      *
-     * @return [0] – success, [-2] – IndexOutOfBoundsException, [3] - wrong tag, [-1] – unhandled exception.
-     * @see dataList
+     * @return [0] – success, [-2] – IndexOutOfBoundsException, [2] - note is empty and/or username & password is empty,
+     * [-1] – unhandled exception.
+     * @see Verifier.verifyData
      */
     fun setNote(id: Int, data: String): Int {
         try {
@@ -120,8 +122,9 @@ abstract class DataTable(
     /**
      * Write new username instead of the old one for the item found by [id].
      *
-     * @return [0] – success, [-2] – IndexOutOfBoundsException, [3] - wrong tag, [-1] – unhandled exception.
-     * @see dataList
+     * @return [0] – success, [-2] – IndexOutOfBoundsException, [2] - note is empty and/or username & password is empty,
+     * [-1] – unhandled exception.
+     * @see Verifier.verifyData
      */
     fun setUsername(id: Int, data: String): Int {
         try {
@@ -144,8 +147,9 @@ abstract class DataTable(
     /**
      * Write new password instead of the old one for the item found by [id].
      *
-     * @return [0] – success, [-2] – IndexOutOfBoundsException, [3] - wrong tag, [-1] – unhandled exception.
-     * @see dataList
+     * @return [0] – success, [-2] – IndexOutOfBoundsException, [2] - note is empty and/or username & password is empty,
+     * [-1] – unhandled exception.
+     * @see Verifier.verifyData
      */
     fun setPassword(id: Int, data: String): Int {
         try {
@@ -166,22 +170,22 @@ abstract class DataTable(
     }
 
     /**
-     * Write new data: [nTag], [nNote], [nUsername], [nPassword] instead of the old for one item found by [id].
+     * Write new data: [tag], [note], [username], [password] instead of the old for the item found by [id].
      *
      * @return [0] – success, [1] – wrong key, [-2] – IndexOutOfBoundsException,
      * [2] - note is empty and/or username & password is empty, [3] - wrong tag,
      * [-1] – unhandled exception.
-     * @see dataList
+     * @see Verifier
      */
-    fun setData(id: Int, nTag: String, nNote: String, nUsername: String, nPassword: String): Int {
-        if (!verifyData(nNote, nUsername, nPassword)) return 2
-        if (nTag !in "0".."5" || nTag.length != 1) return 3
+    fun setData(id: Int, tag: String, note: String, username: String, password: String): Int {
+        if (!verifyData(note, username, password)) return 2
+        if (!verifyTag(tag)) return 3
         try {
             dataList[id].apply {
-                tag = nTag
-                note = nNote
-                username = nUsername
-                password = nPassword
+                this.tag = tag
+                this.note = note
+                this.username = username
+                this.password = password
             }
             isSaved = false
         } catch (e: Exception) {
@@ -196,8 +200,8 @@ abstract class DataTable(
     /**
      * Get all items from the main collection.
      *
-     * @return the collection containing all user information except passwords (passwords are hidden).
-     * "/yes" - item has a password, "/no" - item has no password.
+     * @return the collection containing all user information with hidden passwords.
+     * password == "/yes" - item has a password, password == "/no" - item has no password.
      * @see dataList
      */
     fun getData(): MutableList<DataItem> {
@@ -210,7 +214,7 @@ abstract class DataTable(
     }
 
     /**
-     * Get tag from item found by [id].
+     * Get tag from the item found by [id].
      *
      * @return [value] – success, [/error: outOfBounds] – IndexOutOfBoundsException,
      * [/error: unhandledException] – unhandled exception.
@@ -228,7 +232,7 @@ abstract class DataTable(
     }
 
     /**
-     * Get note from item found by [id].
+     * Get note from the item found by [id].
      *
      * @return [value] – success, [/error: outOfBounds] – IndexOutOfBoundsException,
      * [/error: unhandledException] – unhandled exception.
@@ -246,7 +250,7 @@ abstract class DataTable(
     }
 
     /**
-     * Get username from item found by [id].
+     * Get username from the item found by [id].
      *
      * @return [value] – success, [/error: outOfBounds] – IndexOutOfBoundsException,
      * [/error: unhandledException] – unhandled exception.
@@ -264,7 +268,7 @@ abstract class DataTable(
     }
 
     /**
-     * Get password from item found by [id]. Use this function only when you need to show the password openly.
+     * Get password from the item found by [id]. Use this function only when you need to show the password openly.
      *
      * @return [value] – success, [/error: outOfBounds] – IndexOutOfBoundsException,
      * [/error: unhandledException] – unhandled exception.
@@ -307,7 +311,15 @@ abstract class DataTable(
     fun searchByTag(query: String): List<DataItem> {
         val results = mutableListOf<DataItem>()
         for ((id, data) in dataList.withIndex()) {
-            if (data.tag.contains(query)) results.add(DataItem(data.tag, data.note, data.username, hasPassword(data), id))
+            if (data.tag.contains(query)) results.add(
+                DataItem(
+                    data.tag,
+                    data.note,
+                    data.username,
+                    hasPassword(data),
+                    id
+                )
+            )
         }
 
         return results
@@ -339,23 +351,24 @@ abstract class DataTable(
     }
 
     /**
-     * Fill the main collection with the latest saved data (decrypt and parse data from [cryptData]).
+     * Fill the main collection with the latest saved data, i.e. decrypt and parse data from [encryptedData].
      *
      * @return [0] – success, [2] – unsupported file version, [3] – invalid password,
-     * [4] - the master password was not specified, [-2] – file is corrupted / unhandled exception.
+     * [4] - the primary password was not specified, [-2] – file is corrupted / unhandled exception.
      * @see AesObj
      */
     fun fill(): Int {
         dataList.clear()
-        if (masterPass.isNullOrEmpty()) return 4
-        if (cryptData.isEmpty()) return -2
+        if (primaryPass.isNullOrEmpty()) return 4
+        if (encryptedData.isEmpty()) return -2
 
         /* Checking the file version. */
-        when (cryptData[0]) {
+        when (encryptedData[0]) { // the first character in encryptedData is version indicator
             FileVersion.VER_2_TYPE_A.char() -> {
                 try {
                     /* Decrypting data. */
-                    val data = AesObj.decrypt(cryptData.removeRange(0, 1), masterPass!!)
+                    val encryptedMsg = encryptedData.removeRange(0, 1) // delete version indicator
+                    val data = AesObj.decrypt(encryptedMsg, primaryPass!!)
                     if (data == "/error") return 3
                     if (data == "/emptyCollection") {
                         isSaved = true
@@ -371,26 +384,27 @@ abstract class DataTable(
                     return -2
                 }
             }
+
             else -> return 2
         }
-        isSaved = true
+        isSaved = true // set the flag
         return 0
     }
 
     /**
      * Encrypt and save data to the file.
      *
-     * It is possible to save the file with new [path] and new [masterPass].
+     * It is possible to save the file with new [path] and new [primaryPass].
      * @return [0] – success, [2] – the saved data does not match the current data,
      * [-2] – encryption error, [3] – saved in the same directory as the app,
      * [-3] – error writing to file, [5] - the path to the file for save was not specified,
-     * [6] - the master password was not specified.
+     * [6] - the primary password was not specified.
      * @see AesObj
      */
-    fun save(newPath: String? = path, newMasterPass: String? = masterPass): Int {
+    fun save(newPath: String? = path, newPrimaryPass: String? = primaryPass): Int {
         /* Checking for missing information. */
         path = newPath ?: return 5
-        masterPass = newMasterPass ?: return 6
+        primaryPass = newPrimaryPass ?: return 6
         /* Preparing data for saving. */
         val res: String = if (dataList.isNotEmpty()) {
             val strBuilder = StringBuilder()
@@ -403,8 +417,8 @@ abstract class DataTable(
         /* Encrypting data. */
         val strToSave: String
         try {
-            val encrypt = AesObj.encrypt(res, masterPass!!)
-            val decrypt = AesObj.decrypt(encrypt, masterPass!!) // verification of encryption success
+            val encrypt = AesObj.encrypt(res, primaryPass!!)
+            val decrypt = AesObj.decrypt(encrypt, primaryPass!!) // verification of successful encryption
             if (decrypt == res) strToSave = CurrentVersionFileA.char().toString() + encrypt // add version char
             else return 2
         } catch (e: Exception) {
@@ -418,15 +432,15 @@ abstract class DataTable(
                 val originalName = path!!.substringAfterLast("\\").substringBeforeLast(".").plus(".passtable")
                 writeToFile(originalName, strToSave) // attempt to save the file near the app itself.
                 path = originalName
-                cryptData = strToSave // update class property
-                isSaved = true // reset the flag
+                encryptedData = strToSave // update class property
+                isSaved = true // set the flag
                 return 3
             } catch (e: Exception) {
                 return -3
             }
         }
-        cryptData = strToSave // update class property
-        isSaved = true // reset the flag
+        encryptedData = strToSave // update class property
+        isSaved = true // set the flag
         return 0
     }
 
@@ -449,7 +463,7 @@ abstract class DataTable(
     /**
      * The process of writing encrypted information to the passtable-file.
      *
-     * Abstract because it can be specific to some OS.
+     * Abstract because it can be specific to different OS.
      * It can potentially throw an exception, but it will be handled automatically during the save process.
      * @see save
      */

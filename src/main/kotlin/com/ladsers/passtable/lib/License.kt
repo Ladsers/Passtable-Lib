@@ -1,7 +1,7 @@
 package com.ladsers.passtable.lib
 
 /**
- * The license similar to the one posted on GitHub.
+ * The text of the Apache License Version 2.0, under which all components of the Passtable project are distributed.
  */
 val licenseText = """
                                  Apache License

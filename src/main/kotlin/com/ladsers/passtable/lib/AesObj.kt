@@ -37,35 +37,35 @@ object AesObj {
         val cipher: BufferedBlockCipher = PaddedBufferedBlockCipher(
             CBCBlockCipher(AESEngine()), PKCS7Padding()
         )
-        /* Padding the password to a length of 16, 24, or 32 characters. */
+        /* Padding the password to a length of 16, 24 or 32 characters. */
         if (passwordFull.length > 32 || passwordFull.isEmpty())
             throw Exception("The password contains 0 or more than 32 characters.")
         val newPassLength = if (passwordFull.length <= 16) 16 else if (passwordFull.length <= 24) 24 else 32
-        var iKeyPadding = 0
+        var iKeyPadding = 0 // index for array
         val passwordBuilder = StringBuilder(passwordFull)
-        while (passwordBuilder.length < newPassLength) passwordBuilder.append(keyPadding[iKeyPadding++])
+        while (passwordBuilder.length < newPassLength) passwordBuilder.append(keyPadding[iKeyPadding++]) // padding
         passwordFull = passwordBuilder.toString()
         /* Configuring data for the cryptographic process depending on the selected mode: encryption / decryption. */
         val passwordBytes = passwordFull.toByteArray(StandardCharsets.UTF_8)
         val msg: ByteArray
-        val iv = ByteArray(16)
+        val iv = ByteArray(16) // init vector
         if (isEncryption) {
             if (data.isEmpty()) throw Exception("The data contains nothing.")
             msg = data.toByteArray(StandardCharsets.UTF_8)
             val random = SecureRandom()
-            random.nextBytes(iv)
+            random.nextBytes(iv) // generate init vector
         } else {
             if (data.length <= 16) throw Exception("The data contains nothing.")
             val dataBytes = Base64.decode(data)
             msg = ByteArray(dataBytes.size - 16)
-            System.arraycopy(dataBytes, 0, msg, 0, dataBytes.size - 16)
-            System.arraycopy(dataBytes, dataBytes.size - 16, iv, 0, 16)
-            Arrays.fill(dataBytes, 0.toByte())
+            System.arraycopy(dataBytes, 0, msg, 0, dataBytes.size - 16) // parsing msg
+            System.arraycopy(dataBytes, dataBytes.size - 16, iv, 0, 16) // parsing init vector
+            Arrays.fill(dataBytes, 0.toByte()) // clear
         }
         /* Running the cryptography process. */
         cipher.init(isEncryption, ParametersWithIV(KeyParameter(passwordBytes), iv))
-        val result = ByteArray(cipher.getOutputSize(msg.size))
-        val outOff = cipher.processBytes(msg, 0, msg.size, result, 0)
+        val result = ByteArray(cipher.getOutputSize(msg.size)) // memory allocation for output
+        val outOff = cipher.processBytes(msg, 0, msg.size, result, 0) // registration of data for the cipher
         val strResult = try {
             cipher.doFinal(result, outOff)
             if (isEncryption) Base64.toBase64String(Arrays.concatenate(result, iv)) else String(
