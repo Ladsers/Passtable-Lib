@@ -48,6 +48,14 @@ object Verifier {
     }
 
     /**
+     * Verify the data for the suitability of adding to the collection.
+     *
+     * @return can the data be added to the collection?
+     */
+    fun verifyData(note: String, username: String, password: String) =
+        note.isNotBlank() || (username.isNotBlank() && password.isNotEmpty())
+
+    /**
      * Invalid characters of Unix & OS Windows for the file name.
      */
     const val fileNameInvalidChars = "\\ / : * ? \" < > |"
