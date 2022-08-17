@@ -1,3 +1,5 @@
+package com.ladsers.passtable.lib
+
 import java.net.URL
 import java.util.*
 

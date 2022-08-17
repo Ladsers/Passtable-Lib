@@ -1,3 +1,5 @@
+package com.ladsers.passtable.lib
+
 import org.bouncycastle.crypto.BufferedBlockCipher
 import org.bouncycastle.crypto.DataLengthException
 import org.bouncycastle.crypto.InvalidCipherTextException

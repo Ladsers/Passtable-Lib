@@ -4,13 +4,13 @@ plugins {
     kotlin("jvm") version "1.7.10"
 }
 group = "com.ladsers.passtable"
-version = "22.8.0"
+version = "22.8.1"
 
 repositories {
     mavenCentral()
 }
 
-dependencies{
+dependencies {
     implementation("org.bouncycastle:bcpkix-jdk15on:1.66")
 }
 
@@ -19,5 +19,29 @@ tasks.withType<KotlinCompile>() {
 }
 
 tasks.withType<Jar>() {
-    archiveFileName.set("passtable-lib-${version}.jar")
+    archiveFileName.set("passtable-lib-${project.version}.jar")
+    from(sourceSets.main.get().allSource)
+
+    manifest {
+        attributes(
+            mapOf(
+                "Implementation-Title" to project.name,
+                "Kotlin-Version" to kotlin.coreLibrariesVersion,
+                "Implementation-Version" to project.version,
+                "Build-Jdk" to java.targetCompatibility
+            )
+        )
+    }
+
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter { it.name.endsWith("jar") && it.name.contains("bcp") }
+            .map { zipTree(it) }
+    }) {
+        exclude("META-INF/*.SF")
+        exclude("META-INF/*.DSA")
+        exclude("META-INF/*.RSA")
+    }
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

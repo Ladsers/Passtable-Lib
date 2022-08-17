@@ -1,3 +1,5 @@
+package com.ladsers.passtable.lib
+
 /**
  * An object containing methods for verifying data entered by the user.
  */

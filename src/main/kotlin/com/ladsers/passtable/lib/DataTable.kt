@@ -1,3 +1,5 @@
+package com.ladsers.passtable.lib
+
 /**
  * An abstract class containing all user data and methods for working with them.
  *

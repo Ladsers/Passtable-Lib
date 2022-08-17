@@ -1,3 +1,5 @@
+package com.ladsers.passtable.lib
+
 /**
  * The license similar to the one posted on GitHub.
  */

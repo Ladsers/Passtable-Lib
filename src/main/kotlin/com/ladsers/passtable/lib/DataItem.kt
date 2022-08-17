@@ -1,3 +1,5 @@
+package com.ladsers.passtable.lib
+
 /**
  * A class for storing data of one item.
  *

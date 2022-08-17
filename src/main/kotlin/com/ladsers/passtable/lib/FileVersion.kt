@@ -1,3 +1,5 @@
+package com.ladsers.passtable.lib
+
 /**
  * An enumeration containing all valid versions of the passtable-file.
  */

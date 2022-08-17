@@ -1,3 +1,1 @@
-
-rootProject.name = "kt-lib"
-
+rootProject.name = "Passtable-Lib"
