@@ -4,6 +4,10 @@ package com.ladsers.passtable.lib
  * The text of the Apache License Version 2.0, under which all components of the Passtable project are distributed.
  */
 val licenseText = """
+    Copyright 2022 Maxim Korolev
+    Licensed under the Apache License, Version 2.0
+    
+    
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
