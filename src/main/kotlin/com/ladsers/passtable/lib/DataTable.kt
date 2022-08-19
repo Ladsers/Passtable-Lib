@@ -354,13 +354,22 @@ abstract class DataTable(
      * Fill the main collection with the latest saved data, i.e. decrypt and parse data from [encryptedData].
      *
      * @return [0] – success, [2] – unsupported file version, [3] – invalid password,
-     * [4] - the primary password was not specified, [-2] – file is corrupted / unhandled exception.
-     * @see AesObj
+     * [-2] – file is corrupted / unhandled exception.
+     * @throws: cannot be filled from empty file.
+     * @throws: the primary password cannot be null or empty.
+     * @see DataItem
      */
+    @Throws(Exception::class)
     fun fill(): Int {
         dataList.clear()
-        if (primaryPass.isNullOrEmpty()) return 4
-        if (encryptedData.isEmpty()) return -2
+        if (path == null) { // situation when the file has not yet been created
+            isSaved = true
+            return 0 // it's a normal situation
+        }
+        // Here you cannot work with a file that has been created, but not yet filled. Do "save" first.
+        if (encryptedData.isEmpty()) throw Exception("The file contains nothing. Filling is not possible.")
+        // You are probably trying to load data, but forgot to specify the primary password in the constructor.
+        if (primaryPass.isNullOrEmpty()) throw Exception("The primary password was not specified.")
 
         /* Checking the file version. */
         when (encryptedData[0]) { // the first character in encryptedData is version indicator
@@ -429,7 +438,9 @@ abstract class DataTable(
             writeToFile(path!!, strToSave)
         } catch (e: Exception) {
             try {
-                val originalName = path!!.substringAfterLast("\\").substringBeforeLast(".").plus(".passtable")
+                val osWindows = System.getProperty("os.name").startsWith("win", true)
+                val delimiter = if (osWindows) "\\" else "/"
+                val originalName = path!!.substringAfterLast(delimiter).substringBeforeLast(".").plus(".passtable")
                 writeToFile(originalName, strToSave) // attempt to save the file near the app itself.
                 path = originalName
                 encryptedData = strToSave // update class property
