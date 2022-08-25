@@ -1,6 +1,7 @@
 package com.ladsers.passtable.lib
 
 import com.ladsers.passtable.lib.Verifier.verifyData
+import com.ladsers.passtable.lib.Verifier.verifyItem
 import com.ladsers.passtable.lib.Verifier.verifyTag
 
 /**
@@ -43,11 +44,12 @@ abstract class DataTable(
      * Add an item to the main collection.
      *
      * @return [0] - success, [1] - note is empty and/or username & password is empty,
-     * [2] - wrong tag.
+     * [2] - wrong tag, [3] - some data contains invalid characters.
      * @see Verifier
      */
     fun add(tag: String, note: String, username: String, password: String): Int {
-        if (!verifyData(note, username, password)) return 1
+        if (!verifyData(note, username, password)) return 3
+        if (!verifyItem(note, username, password)) return 1
         if (!verifyTag(tag)) return 2
         dataList.add(DataItem(tag, note, username, password))
         isSaved = false
@@ -97,16 +99,17 @@ abstract class DataTable(
     /**
      * Write new note instead of the old one for the item found by [id].
      *
-     * @return [0] – success, [-2] – IndexOutOfBoundsException, [2] - note is empty and/or username & password is empty,
-     * [-1] – unhandled exception.
-     * @see Verifier.verifyData
+     * @return [0] – success, [-2] – IndexOutOfBoundsException, [1] - note contains invalid characters,
+     * [2] - note is empty and/or username & password is empty, [-1] – unhandled exception.
+     * @see Verifier
      */
     fun setNote(id: Int, data: String): Int {
         try {
             val username = dataList[id].username
             val password = dataList[id].password
 
-            if (!verifyData(data, username, password)) return 2
+            if (!verifyData(data)) return 1
+            if (!verifyItem(data, username, password)) return 2
             dataList[id].note = data
 
             isSaved = false
@@ -122,16 +125,17 @@ abstract class DataTable(
     /**
      * Write new username instead of the old one for the item found by [id].
      *
-     * @return [0] – success, [-2] – IndexOutOfBoundsException, [2] - note is empty and/or username & password is empty,
-     * [-1] – unhandled exception.
-     * @see Verifier.verifyData
+     * @return [0] – success, [-2] – IndexOutOfBoundsException, [1] - password contains invalid characters,
+     * [2] - note is empty and/or username & password is empty, [-1] – unhandled exception.
+     * @see Verifier
      */
     fun setUsername(id: Int, data: String): Int {
         try {
             val note = dataList[id].note
             val password = dataList[id].password
 
-            if (!verifyData(note, data, password)) return 2
+            if (!verifyData(data)) return 1
+            if (!verifyItem(note, data, password)) return 2
             dataList[id].username = data
 
             isSaved = false
@@ -147,16 +151,17 @@ abstract class DataTable(
     /**
      * Write new password instead of the old one for the item found by [id].
      *
-     * @return [0] – success, [-2] – IndexOutOfBoundsException, [2] - note is empty and/or username & password is empty,
-     * [-1] – unhandled exception.
-     * @see Verifier.verifyData
+     * @return [0] – success, [-2] – IndexOutOfBoundsException, [1] - password contains invalid characters,
+     * [2] - note is empty and/or username & password is empty, [-1] – unhandled exception.
+     * @see Verifier
      */
     fun setPassword(id: Int, data: String): Int {
         try {
             val note = dataList[id].note
             val username = dataList[id].username
 
-            if (!verifyData(note, username, data)) return 2
+            if (!verifyData(data)) return 1
+            if (!verifyItem(note, username, data)) return 2
             dataList[id].password = data
 
             isSaved = false
@@ -172,13 +177,13 @@ abstract class DataTable(
     /**
      * Write new data: [tag], [note], [username], [password] instead of the old for the item found by [id].
      *
-     * @return [0] – success, [1] – wrong key, [-2] – IndexOutOfBoundsException,
-     * [2] - note is empty and/or username & password is empty, [3] - wrong tag,
-     * [-1] – unhandled exception.
+     * @return [0] – success, [1] – some data contains invalid characters, [-2] – IndexOutOfBoundsException,
+     * [2] - note is empty and/or username & password is empty, [3] - wrong tag, [-1] – unhandled exception.
      * @see Verifier
      */
     fun setData(id: Int, tag: String, note: String, username: String, password: String): Int {
-        if (!verifyData(note, username, password)) return 2
+        if (!verifyData(note, username, password)) return 1
+        if (!verifyItem(note, username, password)) return 2
         if (!verifyTag(tag)) return 3
         try {
             dataList[id].apply {

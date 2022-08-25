@@ -62,13 +62,25 @@ object Verifier {
      *
      * @return can the data be added to the collection?
      */
-    fun verifyData(note: String, username: String, password: String) =
+    fun verifyData(vararg data: String): Boolean {
+        for (d in data) {
+            if (d.contains("[\\x00-\\x1F]".toRegex())) return false
+        }
+        return true
+    }
+
+    /**
+     * Verify the data set against the item rule.
+     *
+     * @return can the item be added to the collection?
+     */
+    fun verifyItem(note: String, username: String, password: String) =
         note.isNotBlank() || (username.isNotBlank() && password.isNotEmpty())
 
     /**
      * Verify the tag for the suitability of adding to the item.
      *
-     * @return can the tag be added to the item?
+     * @return can the tag be assigned to the item?
      */
     fun verifyTag(tag: String) = tag in "0".."5" && tag.length == 1
 }
