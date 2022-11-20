@@ -1,0 +1,33 @@
+name: Bug report
+description: Create a report to help us improve
+title: "Bug title"
+labels: []
+body: 
+  - type: textarea
+    validations:
+      required: true
+    attributes:
+      label: Describe the bug
+      description: A sufficient description of the bug
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: A concise description of what you expected to happen
+  - type: input
+    validations:
+      required: true
+    attributes:
+      label: Library version
+      description: The version of the library can be found in the file "build.gradle.kts"
+  - type: input
+    attributes:
+      label: Operating system
+      description: Please specify the operating system with the version tag or build number
+      placeholder: e.g. Ubuntu 22.10, Windows 11 (22621), macOS 13.0.1
+  - type: input
+    attributes:
+      label: IDE
+      description: What IDE are you using?
+  - type: textarea
+    attributes:
+      label: Additional context
