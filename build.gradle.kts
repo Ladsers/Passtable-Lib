@@ -1,10 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "1.8.20"
+    kotlin("plugin.serialization") version "1.8.20"
+
 }
 group = "com.ladsers.passtable"
-version = "23.04.0-dev"
+version = "23.05.0-beta1"
 
 repositories {
     mavenCentral()
@@ -12,6 +14,7 @@ repositories {
 
 dependencies {
     implementation("org.bouncycastle:bcpkix-jdk15on:1.66")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 }
 
 tasks.withType<KotlinCompile>() {
