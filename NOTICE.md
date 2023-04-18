@@ -1,5 +1,5 @@
 # Passtable-Lib
-Copyright 2022 Maxim Korolev
+Copyright 2023 Maxim Korolev
 <br /><br />
 ### This software includes binary files and/or source codes from third party:
 
