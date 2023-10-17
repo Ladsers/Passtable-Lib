@@ -6,7 +6,7 @@ plugins {
 
 }
 group = "com.ladsers.passtable"
-version = "23.05.0-beta1"
+version = "23.10.0"
 
 repositories {
     mavenCentral()
