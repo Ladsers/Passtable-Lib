@@ -1,6 +1,6 @@
 package com.ladsers.passtable.lib.updater
 
-import com.ladsers.passtable.lib.codes.UpdaterCheckResult
+import com.ladsers.passtable.lib.enums.UpdaterCheckResult
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.net.URL
@@ -9,6 +9,7 @@ import java.util.*
 /**
  * An object responsible for updating applications. Supported platforms: jvm, android.
  */
+@Deprecated("Use a submodule to interact with the server: https://github.com/Ladsers/ladsers-web")
 object Updater {
 
     private val source = URL("""https://ladsers.com/wp-content/uploads/passtable-appversion.json""")

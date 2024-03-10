@@ -1,4 +1,4 @@
-package com.ladsers.passtable.lib.codes
+package com.ladsers.passtable.lib.enums
 
 enum class UpdaterCheckResult {
     UP_TO_DATE,

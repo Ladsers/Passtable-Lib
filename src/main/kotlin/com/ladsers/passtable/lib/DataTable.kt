@@ -296,7 +296,7 @@ abstract class DataTable(
      * @return the filtered collection.
      * @see dataList
      */
-    fun searchByData(query: String): List<DataItem> {
+    fun searchByText(query: String): List<DataItem> {
         val results = mutableListOf<DataItem>()
         val queryLowerCase = query.lowercase()
         for ((id, data) in dataList.withIndex()) {
@@ -306,6 +306,12 @@ abstract class DataTable(
 
         return results
     }
+
+    @Deprecated(
+        message = "Incorrect function name. Use function with the correct name.",
+        replaceWith = ReplaceWith("searchByText(query)")
+    )
+    fun searchByData(query: String) = searchByText(query)
 
     /**
      * Get collection where tag contains the following search [query].
@@ -353,6 +359,22 @@ abstract class DataTable(
         }
 
         return results
+    }
+
+    /**
+     * Swap the specified items in the main collection.
+     */
+    fun swapItems(from: Int, to: Int) {
+        dataList[to] = dataList[from].also { dataList[from] = dataList[to] }
+    }
+
+    /**
+     * Move an item in the main collection from the [from] position to the [to] position.
+     */
+    fun moveItem(from: Int, to: Int) {
+        val item = dataList[from]
+        dataList.remove(item)
+        dataList.add(to, item)
     }
 
     /**
